@@ -66,8 +66,8 @@ EOM
   install -Dm644 LICENSE "${pkgdir}/opt/sonic3air/LICENSE"
 
   cd "./Oxygen/sonic3air"
-  # ./sonic3air_linux -dumpcppdefinitions -nativize
-  ./sonic3air_linux -pack
+  ./sonic3air_linux -dumpcppdefinitions # Needs to do this to generate saves/scripts.bin
+  ./sonic3air_linux -pack # Generates the other data bin files
   mkdir -p _master_image_template/data/
   mv enginedata.bin _master_image_template/data/
   mv gamedata.bin _master_image_template/data/
@@ -89,8 +89,8 @@ EOM
   install -dm755 "${pkgdir}/opt/sonic3air/doc"
   cp -r doc/* "${pkgdir}/opt/sonic3air/doc/"
 
-  # install -dm755 "${pkgdir}/opt/sonic3air/data"
-  # cp -r data/* "${pkgdir}/opt/sonic3air/data/"
+  install -dm755 "${pkgdir}/opt/sonic3air/data"
+  cp -r data/* "${pkgdir}/opt/sonic3air/data/"
 
   install -Dm644 config.json "${pkgdir}/opt/sonic3air/config.json"
   install -Dm644 Manual.pdf "${pkgdir}/opt/sonic3air/Manual.pdf"
