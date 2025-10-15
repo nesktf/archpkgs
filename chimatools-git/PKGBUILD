@@ -1,0 +1,31 @@
+# Maintainer: nesktf <nesktf@proton.me>
+
+pkgname=chimatools-git
+pkgrel=1
+pkgdesc="CHIMA game asset management library, built from latest git"
+pkgver="r31.73d6df5"
+arch=('x86_64' 'x86' 'aarch64')
+url="https://github.com/nesktf/chimatools"
+license=('MIT')
+makedepends=('git')
+depends=('luajit' 'luarocks')
+makedepends=('base-devel')
+source=("${pkgname}::git+${url}.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/${pkgname}"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+  cd "${srcdir}/${pkgname}"
+  make all
+}
+
+package() {
+  cd "${srcdir}/${pkgname}"
+  make DESTDIR="${pkgdir}/" PREFIX=usr/ install
+  install -dm755 "${pkgdir}/usr/share/licenses/chimatools/"
+  install -Dm755 "${srcdir}/${pkgname}/LICENSE.md" "${pkgdir}/usr/share/licenses/chimatools/LICENSE"
+}

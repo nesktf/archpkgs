@@ -1,0 +1,16 @@
+pkgbase = chimatools-git
+	pkgdesc = CHIMA game asset management library, built from latest git
+	pkgver = r31.73d6df5
+	pkgrel = 1
+	url = https://github.com/nesktf/chimatools
+	arch = x86_64
+	arch = x86
+	arch = aarch64
+	license = MIT
+	makedepends = base-devel
+	depends = luajit
+	depends = luarocks
+	source = chimatools-git::git+https://github.com/nesktf/chimatools.git
+	sha256sums = SKIP
+
+pkgname = chimatools-git
