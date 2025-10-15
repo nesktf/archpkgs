@@ -1,0 +1,78 @@
+# Maintainer: nesktf <nesktf@proton.me>
+
+pkgname=sonic3air-git
+pkgver=v25.02.15.0.test.r1416.b584686
+pkgrel=1
+pkgdesc='A fan-made widescreen remaster of Sonic 3 & Knuckles, built from latest git'
+arch=('x86_64' 'aarch64')
+url='https://github.com/Eukaryot/sonic3air'
+license=('GPL 3.0')
+makedepends=('git' 'cmake' 'alsa-lib' 'libxcomposite' 'openssl' 'libxxf86vm' 'libpulse' 'glu')
+depends=('opengl-driver' 'zenity' 'yad')
+provides=(sonic3air)
+source=("${pkgname}::git+https://github.com/Eukaryot/sonic3air.git"
+        '0001-fix-sdl-pipewire.patch')
+sha256sums=('SKIP'
+            'f47713e1a79dbe8aa633fc3400a4e4b03bb3be26dc385f6ebb15fd7aeeaa6a8a')
+
+pkgver() {
+  cd "${srcdir}/${pkgname}"
+  printf "v%s.r%s.%s" "$(git tag --sort=committerdate | tail -1 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+prepare() {
+  cd "${srcdir}/${pkgname}"
+  patch -p1 < "${srcdir}/0001-fix-sdl-pipewire.patch"
+}
+
+build() {
+  cd "${srcdir}/${pkgname}/Oxygen/sonic3air/build/_cmake/"
+  mkdir -p build
+  cd ./build
+  cmake -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_OXYGEN_ENGINEAPP=OFF ..
+  cmake --build .
+}
+
+package() {
+  install -dm755 "${pkgdir}/usr/share/applications"
+  cat <<EOM > "${pkgdir}/usr/share/applications/sonic3air.desktop"
+[Desktop Entry]
+Name=Sonic 3 A.I.R.
+Type=Application
+Encoding=UTF-8
+Exec=/opt/sonic3air/sonic3air_linux
+Icon=/opt/sonic3air/data/icon.png
+Terminal=false
+EOM
+
+  install -dm755 "${pkgdir}/opt/sonic3air/"
+  cd "${srcdir}/${pkgname}"
+  install -Dm644 LICENSE "${pkgdir}/opt/sonic3air/LICENSE"
+
+  cd "./Oxygen/sonic3air"
+  # ./sonic3air_linux -dumpcppdefinitions -nativize
+  ./sonic3air_linux -pack
+  mkdir -p _master_image_template/data/
+  mv enginedata.bin _master_image_template/data/
+  mv gamedata.bin _master_image_template/data/
+  mv audiodata.bin _master_image_template/data/
+  mv audioremaster.bin _master_image_template/data/
+  cp data/metadata.json _master_image_template/data/
+  cp data/images/icon.png _master_image_template/data/icon.png
+
+  install -Dm755 sonic3air_linux "${pkgdir}/opt/sonic3air/sonic3air_linux"
+
+  cd "./_master_image_template"
+  install -dm755 "${pkgdir}/opt/sonic3air/bonus"
+  cp -r bonus/* "${pkgdir}/opt/sonic3air/doc/"
+
+  install -dm755 "${pkgdir}/opt/sonic3air/doc"
+  cp -r doc/* "${pkgdir}/opt/sonic3air/doc/"
+
+  install -dm755 "${pkgdir}/opt/sonic3air/data"
+  cp -r data/* "${pkgdir}/opt/sonic3air/data/"
+
+  install -Dm644 config.json "${pkgdir}/opt/sonic3air/config.json"
+  install -Dm644 Manual.pdf "${pkgdir}/opt/sonic3air/Manual.pdf"
+}
